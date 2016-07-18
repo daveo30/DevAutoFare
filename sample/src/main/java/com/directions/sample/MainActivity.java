@@ -20,7 +20,9 @@ import com.directions.route.Route;
 import com.directions.route.RouteException;
 import com.directions.route.Routing;
 import com.directions.route.RoutingListener;
+import com.gc.materialdesign.views.ButtonFloat;
 import com.gc.materialdesign.widgets.Dialog;
+import com.gc.materialdesign.widgets.SnackBar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -41,6 +43,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,7 +61,13 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
     AutoCompleteTextView destination;
     @InjectView(R.id.send)
     ImageView send;
+
+    @InjectView(R.id.buttonFloat)
+    ButtonFloat refreshText;
+
     Dialog dialog;
+    float routeFare[];
+    int alternativeRoutesCount= 0;
     private static final String LOG_TAG = "MyActivity";
     protected GoogleApiClient mGoogleApiClient;
     private PlaceAutoCompleteAdapter mAdapter;
@@ -78,8 +87,10 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        //getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        //refreshText= (ButtonFloat) findViewById(R.id.buttonFloat);
+        refreshText.setDrawableIcon(getResources().getDrawable(R.drawable.ic_clear_white_24dp));
         polylines = new ArrayList<>();
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Places.GEO_DATA_API)
@@ -114,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
         });
 
 
-        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(18.013610, -77.498803));
+        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(28.613939, 77.209021));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
 
         map.moveCamera(center);
@@ -307,6 +318,16 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
             }
         });
 
+
+
+        refreshText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                starting.setText(" ");
+                destination.setText(" ");
+            }
+        });
+
     }
 
     @OnClick(R.id.send)
@@ -356,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
             Routing routing = new Routing.Builder()
                     .travelMode(AbstractRouting.TravelMode.DRIVING)
                     .withListener(this)
-                    .alternativeRoutes(true)
+                    .alternativeRoutes(true)  //set to false by daveo30
                     .waypoints(start, end)
                     .build();
             routing.execute();
@@ -383,6 +404,8 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
     @Override
     public void onRoutingSuccess(List<Route> route, int shortestRouteIndex)
     {
+        routeFare= new float[10];
+
         progressDialog.dismiss();
         CameraUpdate center = CameraUpdateFactory.newLatLng(start);
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
@@ -412,23 +435,43 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
 
             Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
 
+
+            //to calculate auto fares of each route and store in routeFare float array
             Log.d("Distance "," "+route.get(i).getDistanceValue());
-            float distance= route.get(i).getDistanceValue()/1000;
 
-            Log.d("floatDistance "," "+distance);
-            float fare=0;
-            String title="Auto Fare";
-            if(distance>2) {
-                fare = distance - 2;
-                fare =fare*8;
-                fare+=25;
-            }
+               float distance = route.get(i).getDistanceValue() / 1000;
 
+               Log.d("floatDistance ", " " + distance);
+                routeFare[i] = 25;
 
-            String message= "Your auto fare should be about "+fare;
-            dialog = new Dialog(MainActivity.this, title, message);
-            dialog.show();
+               if (distance > 2) {
+                  distance = distance - 2;
+                   routeFare[i] +=distance * 8;
+
+               }
         }
+
+
+        //calculate average of the autofares for different routes
+
+            String title = "Auto Fare";
+
+        float finalRouteFare=0;
+        int i=0;
+        while(i < route.size()) {
+
+             finalRouteFare = finalRouteFare +  routeFare[i];
+            i++;
+
+        }
+        finalRouteFare= finalRouteFare/route.size();
+        finalRouteFare = round(finalRouteFare,1);
+        String message = "Your auto fare should be about " + finalRouteFare;
+        dialog = new Dialog(MainActivity.this, title, message);
+       dialog.show();
+       // SnackBar snackbar = new SnackBar(MainActivity.this, message," OK ", null );
+       // snackbar.show();
+
 
         // Start marker
         MarkerOptions options = new MarkerOptions();
@@ -443,6 +486,18 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
         map.addMarker(options);
 
     }
+
+
+
+    //to round of the float to required number of decimals
+    public static float round(float d, int decimalPlace) {
+        BigDecimal bd = new BigDecimal(Float.toString(d));
+        bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+        return bd.floatValue();
+    }
+
+
+
 
     @Override
     public void onRoutingCancelled() {
