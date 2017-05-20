@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.directions.sample" >
+    package="com.directions.sample">
+
     <!-- Copied from Google Maps Library/AndroidManifest.xml. -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <!-- External storage for caching. -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -18,21 +19,31 @@
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:label="Fair"
+        android:theme="@style/AppTheme">
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAr5No3TwJY5cNlYyOX6PlpYmBC9d5mOjU"/>
+            android:value="AIzaSyAr5No3TwJY5cNlYyOX6PlpYmBC9d5mOjU" />
 
         <activity
             android:name=".MainActivity"
-            android:label="Devansh's Auto Fare" >
+            android:label="Devansh&apos;s Auto Fare"></activity>
+        <activity
+            android:name=".CitySelectionActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Fair"
+            android:theme="@style/FullscreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".UserSelectionActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_user_selection"
+            android:theme="@style/FullscreenTheme"></activity>
     </application>
 
 </manifest>

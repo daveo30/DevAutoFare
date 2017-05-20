@@ -1,12 +1,16 @@
 package com.directions.sample;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -62,6 +66,7 @@ public class UserSelectionActivity extends AppCompatActivity {
         }
     };
     private boolean mVisible;
+    Button user,auto;
     private final Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
@@ -105,7 +110,37 @@ public class UserSelectionActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.button_user).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.button_auto).setOnTouchListener(mDelayHideTouchListener);
+
+        user  =(Button) findViewById(R.id.button_user);
+        auto =(Button) findViewById(R.id.button_auto);
+
+
+
+        user.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = getSharedPreferences("Type", MODE_PRIVATE).edit();
+                editor.putString("type", "User");
+
+                editor.commit();
+
+                Intent intent= new Intent(UserSelectionActivity.this,MainActivity.class);
+                startActivity(intent);
+            }
+        });
+        auto.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = getSharedPreferences("Type", MODE_PRIVATE).edit();
+                editor.putString("type", "Auto");
+
+                editor.commit();
+                Intent intent= new Intent(UserSelectionActivity.this,MainActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override

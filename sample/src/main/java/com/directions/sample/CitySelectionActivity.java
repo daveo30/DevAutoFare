@@ -1,12 +1,18 @@
 package com.directions.sample;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+
+
+import static com.directions.sample.R.styleable.ActionBar;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -62,6 +68,8 @@ public class CitySelectionActivity extends AppCompatActivity {
         }
     };
     private boolean mVisible;
+    Button delhi, mumbai,pune,bangalore;
+
     private final Runnable mHideRunnable = new Runnable() {
         @Override
         public void run() {
@@ -105,7 +113,63 @@ public class CitySelectionActivity extends AppCompatActivity {
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.button_delhi).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.button_mumbai).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.button_pune).setOnTouchListener(mDelayHideTouchListener);
+        findViewById(R.id.button_bangalore).setOnTouchListener(mDelayHideTouchListener);
+
+        delhi =(Button) findViewById(R.id.button_delhi);
+        mumbai =(Button) findViewById(R.id.button_mumbai);
+        pune =(Button) findViewById(R.id.button_pune);
+        bangalore =(Button) findViewById(R.id.button_bangalore);
+
+
+        delhi.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = getSharedPreferences("City", MODE_PRIVATE).edit();
+                editor.putString("name", "Delhi");
+
+                editor.commit();
+
+                Intent intent= new Intent(CitySelectionActivity.this,UserSelectionActivity.class);
+                startActivity(intent);
+            }
+        });
+        mumbai.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = getSharedPreferences("City", MODE_PRIVATE).edit();
+                editor.putString("name", "Mumbai");
+
+                editor.commit();
+                Intent intent= new Intent(CitySelectionActivity.this,UserSelectionActivity.class);
+                startActivity(intent);
+            }
+        });
+        pune.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = getSharedPreferences("City", MODE_PRIVATE).edit();
+                editor.putString("name", "Pune");
+
+                editor.commit();
+                Intent intent= new Intent(CitySelectionActivity.this,UserSelectionActivity.class);
+                startActivity(intent);
+            }
+        });
+        bangalore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences.Editor editor = getSharedPreferences("City", MODE_PRIVATE).edit();
+                editor.putString("name", "Bangalore");
+
+                editor.commit();
+                Intent intent= new Intent(CitySelectionActivity.this,UserSelectionActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     @Override

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0099cc"
+    android:background="#FFFFFF"
     tools:context="com.directions.sample.CitySelectionActivity">
 
     <!-- The primary full-screen view. This can be replaced with whatever view
@@ -12,11 +12,13 @@
         android:id="@+id/fullscreen_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="top"
         android:keepScreenOn="true"
-        android:text="@string/dummy_content"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
+        android:layout_marginTop="50dp"
+        android:layout_marginLeft="25dp"
+        android:text="Choose your City"
+        android:textColor="@color/primary_text"
+        android:textSize="40sp"
         android:textStyle="bold" />
 
     <!-- This FrameLayout insets its children based on system windows using
@@ -24,25 +26,60 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:fitsSystemWindows="true"
+        android:layout_marginTop="10dp">
 
         <LinearLayout
             android:id="@+id/fullscreen_content_controls"
             style="?metaButtonBarStyle"
-            android:layout_width="match_parent"
+            android:layout_width="350dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="@color/black_overlay"
-            android:orientation="horizontal"
+            android:layout_gravity="center|center_horizontal"
+            android:layout_margin="100dp"
+            android:orientation="vertical"
+
             tools:ignore="UselessParent">
 
             <Button
-                android:id="@+id/dummy_button"
+                android:id="@+id/button_delhi"
                 style="?metaButtonBarButtonStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/dummy_button" />
+                android:textColor="@color/primary_text"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_weight="0.25"
+
+                android:background="#81D4FA"
+                android:text="Delhi" />
+            <Button
+                android:id="@+id/button_mumbai"
+                style="?metaButtonBarButtonStyle"
+                android:textColor="@color/primary_text"
+                android:layout_width="match_parent"
+                android:layout_marginTop="20dp"
+                android:layout_height="100dp"
+                android:layout_weight="0.25"
+                android:background="#81D4FA"
+                android:text="Mumbai" />
+            <Button
+                android:id="@+id/button_pune"
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:textColor="@color/primary_text"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:layout_weight="0.25"
+                android:background="#81D4FA"
+                android:text="Pune" />
+            <Button
+                android:id="@+id/button_bangalore"
+                style="?metaButtonBarButtonStyle"
+                android:layout_width="match_parent"
+                android:textColor="@color/primary_text"
+                android:layout_height="100dp"
+                android:layout_marginTop="20dp"
+                android:background="#81D4FA"
+                android:layout_weight="0.25"
+                android:text="Bangalore" />
 
         </LinearLayout>
     </FrameLayout>

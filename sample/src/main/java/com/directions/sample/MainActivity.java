@@ -1,11 +1,13 @@
 package com.directions.sample;
 
 import android.app.ProgressDialog;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -34,6 +36,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -51,8 +54,8 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements RoutingListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
-    protected GoogleMap map;
+public class MainActivity extends AppCompatActivity implements RoutingListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, OnMapReadyCallback {
+
     protected LatLng start;
     protected LatLng end;
     @InjectView(R.id.start)
@@ -65,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
     @InjectView(R.id.buttonFloat)
     ButtonFloat refreshText;
 
+    GoogleMap map1;
     Dialog dialog;
     float routeFare[];
     int alternativeRoutesCount= 0;
@@ -76,7 +80,11 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
     private static final int[] COLORS = new int[]{R.color.primary_dark,R.color.primary,R.color.primary_light,R.color.accent,R.color.primary_dark_material_light};
 
 
-    private static final LatLngBounds BOUNDS_JAMAICA= new LatLngBounds(new LatLng(-57.965341647205726, 144.9987719580531),
+    double lat,lon;
+
+    CardView cardView;
+
+    private static final LatLngBounds BOUNDS= new LatLngBounds(new LatLng(-57.965341647205726, 144.9987719580531),
             new LatLng(72.77492067739843, -9.998857788741589));
 
     /**
@@ -89,6 +97,39 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
         ButterKnife.inject(this);
         //getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+
+        SharedPreferences prefs2 = getSharedPreferences("Type", MODE_PRIVATE);
+        String type = prefs2.getString("type", null);
+
+
+        if(type.equals("Auto")) {
+            cardView = (CardView) findViewById(R.id.cardview);
+            cardView.setVisibility(View.INVISIBLE);
+
+        }
+
+
+        SharedPreferences prefs = getSharedPreferences("City", MODE_PRIVATE);
+        String city = prefs.getString("name", null);
+
+        if(city=="Delhi"){
+            lat= 28.613939;
+            lon= 77.209021;
+
+        }
+        else if(city=="Mumbai"){
+            lat= 19.0760;
+             lon= 72.8777;
+
+        }
+        else if(city=="Pune"){
+            lat=18.5204;
+            lon=73.8567;
+        }
+        else if(city=="Bangalore"){
+            lat=12.9716;
+            lon=77.5946;
+        }
         //refreshText= (ButtonFloat) findViewById(R.id.buttonFloat);
         refreshText.setDrawableIcon(getResources().getDrawable(R.drawable.ic_clear_white_24dp));
         polylines = new ArrayList<>();
@@ -106,16 +147,30 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
             mapFragment = SupportMapFragment.newInstance();
             getSupportFragmentManager().beginTransaction().replace(R.id.map, mapFragment).commit();
         }
-        map = mapFragment.getMap();
+        mapFragment.getMapAsync(this);
 
         mAdapter = new PlaceAutoCompleteAdapter(this, android.R.layout.simple_list_item_1,
-                mGoogleApiClient, BOUNDS_JAMAICA, null);
+                mGoogleApiClient, BOUNDS, null);
 
 
         /*
         * Updates the bounds being used by the auto complete adapter based on the position of the
         * map.
         * */
+
+    }
+
+    @Override
+    public void onMapReady(final GoogleMap map) {
+//DO WHATEVER YOU WANT WITH GOOGLEMAP
+      /*  map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        map.setMyLocationEnabled(true);
+        map.setTrafficEnabled(true);
+        map.setIndoorEnabled(true);
+        map.setBuildingsEnabled(true);
+        map.getUiSettings().setZoomControlsEnabled(true);*/
+
+        map1= map;
         map.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition position) {
@@ -123,9 +178,46 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
                 mAdapter.setBounds(bounds);
             }
         });
+        SharedPreferences prefs = getSharedPreferences("Type", MODE_PRIVATE);
+        String type = prefs.getString("type", null);
 
 
-        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(28.613939, 77.209021));
+        if(type.equals("Auto")) {
+
+            SharedPreferences prefs1 = getSharedPreferences("Type", MODE_PRIVATE);
+
+            double latitude = Double.longBitsToDouble(prefs1.getLong("lat", 0));
+            double longitude = Double.longBitsToDouble(prefs1.getLong("lon", 0));
+
+
+            map.addMarker(new MarkerOptions()
+                    .position(new LatLng(latitude, longitude))
+                    .title("User here"));
+
+        }
+
+
+        if(type.equals("User")) {
+
+            map.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                @Override
+                public void onMapClick(LatLng latLng) {
+
+                    map.addMarker(new MarkerOptions()
+                            .position(new LatLng(latLng.latitude, latLng.longitude))
+                            .title("I am Here"));
+                    SharedPreferences.Editor editor = getSharedPreferences("Type", MODE_PRIVATE).edit();
+
+                    editor.putLong("lat", Double.doubleToLongBits(latLng.latitude));
+                    editor.putLong("lon", Double.doubleToLongBits(latLng.longitude));
+                    editor.commit();
+                }
+            });
+
+        }
+
+
+        CameraUpdate center = CameraUpdateFactory.newLatLng(new LatLng(lat, lon));
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
 
         map.moveCamera(center);
@@ -410,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
         CameraUpdate center = CameraUpdateFactory.newLatLng(start);
         CameraUpdate zoom = CameraUpdateFactory.zoomTo(16);
 
-        map.moveCamera(center);
+        map1.moveCamera(center);
 
 
         if(polylines.size()>0) {
@@ -430,25 +522,85 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
             polyOptions.color(getResources().getColor(COLORS[colorIndex]));
             polyOptions.width(10 + i * 3);
             polyOptions.addAll(route.get(i).getPoints());
-            Polyline polyline = map.addPolyline(polyOptions);
+            Polyline polyline = map1.addPolyline(polyOptions);
             polylines.add(polyline);
 
-            Toast.makeText(getApplicationContext(),"Route "+ (i+1) +": distance - "+ route.get(i).getDistanceValue()+": duration - "+ route.get(i).getDurationValue(),Toast.LENGTH_SHORT).show();
+            SharedPreferences prefs = getSharedPreferences("City", MODE_PRIVATE);
+            String city = prefs.getString("name", "Delhi");
+
+            if(city.equals("Delhi")) {
+                Toast.makeText(getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
 
 
-            //to calculate auto fares of each route and store in routeFare float array
-            Log.d("Distance "," "+route.get(i).getDistanceValue());
+                //to calculate auto fares of each route and store in routeFare float array
+                Log.d("Distance ", " " + route.get(i).getDistanceValue());
 
-               float distance = route.get(i).getDistanceValue() / 1000;
+                float distance = route.get(i).getDistanceValue() / 1000;
 
-               Log.d("floatDistance ", " " + distance);
+                Log.d("floatDistance ", " " + distance);
                 routeFare[i] = 25;
 
-               if (distance > 2) {
-                  distance = distance - 2;
-                   routeFare[i] +=distance * 8;
+                if (distance > 2) {
+                    distance = distance - 2;
+                    routeFare[i] += distance * 8;
 
-               }
+                }
+            }
+            else if(city.equals("Mumbai")){
+                Toast.makeText(getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
+
+
+                //to calculate auto fares of each route and store in routeFare float array
+                Log.d("Distance ", " " + route.get(i).getDistanceValue());
+
+                float distance = route.get(i).getDistanceValue() / 1000;
+
+                Log.d("floatDistance ", " " + distance);
+                routeFare[i] = 22;
+
+                if (distance > 2) {
+                    distance = distance - 2;
+                    routeFare[i] += distance * 15;
+
+                }
+            }
+            else if(city.equals("Pune")){
+                Toast.makeText(getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
+
+
+                //to calculate auto fares of each route and store in routeFare float array
+                Log.d("Distance ", " " + route.get(i).getDistanceValue());
+
+                float distance = route.get(i).getDistanceValue() / 1000;
+
+                Log.d("floatDistance ", " " + distance);
+                routeFare[i] = 18;
+
+                if (distance > 2) {
+                    distance = distance - 2;
+                    routeFare[i] += distance * 12;
+
+                }
+            }
+
+            else if(city.equals("Bangalore")){
+                Toast.makeText(getApplicationContext(), "Route " + (i + 1) + ": distance - " + route.get(i).getDistanceValue() + ": duration - " + route.get(i).getDurationValue(), Toast.LENGTH_SHORT).show();
+
+
+                //to calculate auto fares of each route and store in routeFare float array
+                Log.d("Distance ", " " + route.get(i).getDistanceValue());
+
+                float distance = route.get(i).getDistanceValue() / 1000;
+
+                Log.d("floatDistance ", " " + distance);
+                routeFare[i] = 25;
+
+                if (distance > 2) {
+                    distance = distance - 2;
+                    routeFare[i] += distance * 13;
+
+                }
+            }
         }
 
 
@@ -477,13 +629,13 @@ public class MainActivity extends AppCompatActivity implements RoutingListener, 
         MarkerOptions options = new MarkerOptions();
         options.position(start);
         options.icon(BitmapDescriptorFactory.fromResource(R.drawable.start_blue));
-        map.addMarker(options);
+        map1.addMarker(options);
 
         // End marker
         options = new MarkerOptions();
         options.position(end);
         options.icon(BitmapDescriptorFactory.fromResource(R.drawable.end_green));
-        map.addMarker(options);
+        map1.addMarker(options);
 
     }
 
